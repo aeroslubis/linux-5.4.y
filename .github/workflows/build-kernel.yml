@@ -72,5 +72,6 @@ jobs:
     - name: Build Kernel
       id: build
       run: |
+        mv config .config
         ./set_make
         echo "::set-output name=status::success"
