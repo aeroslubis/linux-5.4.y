@@ -62,8 +62,20 @@ jobs:
       id: build
       run: |
         mv config .config
+        mkdir release
         sudo ./set_make
+        sudo ./set_modules
+        sudo ./set_install
         echo "::set-output name=status::success"
+
+    - name: Upload kernel to Actions
+      uses: actions/upload-artifact@v2
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: armvirt_64_${{ env.FILE_DATE }}
+        path: release
+        retention-days: ${{ env.RECENT_LASTEST }}
+        if-no-files-found: ignore
 
     - name: SSH connection to Actions @ Ctrl+C to enter, Ctrl+D to exit
       uses: P3TERX/ssh2actions@main
