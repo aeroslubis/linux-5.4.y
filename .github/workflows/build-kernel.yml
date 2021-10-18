@@ -58,17 +58,6 @@ jobs:
         wget "https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz"
         tar xf gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
 
-    - name: SSH connection to Actions @ Ctrl+C to enter, Ctrl+D to exit
-      uses: P3TERX/ssh2actions@main
-      with:
-        mode: ngrok
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
-        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
     - name: Compile Kernel
       id: compile
       run: |
@@ -85,6 +74,17 @@ jobs:
         sudo rm -rf kernel modules dtb
         ls -lha
         echo "::set-output name=status::success"
+
+    - name: SSH connection to Actions @ Ctrl+C to enter, Ctrl+D to exit
+      uses: P3TERX/ssh2actions@main
+      with:
+        mode: ngrok
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
 
     - name: Upload kernel to Actions
       uses: actions/upload-artifact@v2
