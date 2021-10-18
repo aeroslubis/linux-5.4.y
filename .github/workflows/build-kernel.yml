@@ -82,7 +82,7 @@ jobs:
         tar czf kernel.tar.gz kernel/*
         tar czf modules.tar.gz modules/*
         tar czf dtb.tar.gz dtb/*
-        rm -rf kernel modules dtb
+        sudo rm -rf kernel modules dtb
         ls -lha
         echo "::set-output name=status::success"
 
