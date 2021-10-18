@@ -66,6 +66,12 @@ jobs:
         sudo ./set_make
         sudo ./set_modules
         sudo ./set_install
+        cd release
+        tar czf kernel.tar.gz kernel/*
+        tar czf modules.tar.gz modules/*
+        cp -r ../arch/arm64/boot/dtb .
+        tar czf dtb.tar.gz dtb/*
+        rm -rf kernel modules dtb
         echo "::set-output name=status::success"
 
     - name: Upload kernel to Actions
