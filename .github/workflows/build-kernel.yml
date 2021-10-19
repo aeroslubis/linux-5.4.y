@@ -17,11 +17,6 @@ on:
 #    - cron: '0 17 * * 0'
 
 env:
-  DELETE_RELEASE: true
-  DELETE_ARTIFACTS: true
-  KEEP_DAY: 30
-  KEEP_MININUM_RUNS: 0
-  KEEP_MININUM_RELEASE: 6
   TZ: Asia/Jakarta
 
 jobs:
@@ -58,6 +53,17 @@ jobs:
         wget "https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz"
         tar xf gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
 
+    - name: SSH connection to Actions @ Ctrl+C to enter, Ctrl+D to exit
+      uses: P3TERX/ssh2actions@main
+      with:
+        mode: ngrok
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+
     - name: Compile Kernel
       id: compile
       run: |
@@ -74,24 +80,13 @@ jobs:
         sudo rm -rf kernel modules dtb
         ls -lha
         echo "::set-output name=status::success"
+        echo "PACKAGED_OUTPUTPATH=${PWD}" >> $GITHUB_ENV
 
-    - name: SSH connection to Actions @ Ctrl+C to enter, Ctrl+D to exit
-      uses: P3TERX/ssh2actions@main
-      with:
-        mode: ngrok
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+    - name: Upload Kernel to Release
+      uses: softprops/action-gh-release@v1
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
-        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
-    - name: Upload kernel to Actions
-      uses: actions/upload-artifact@v2
-      if: steps.compile.outputs.status == 'success'
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: armvirt_64_${{ env.FILE_DATE }}
-        path: release
-        retention-days: ${{ env.RECENT_LASTEST }}
-        if-no-files-found: ignore
-
+        tag_name: s905x_kernel_5.4.154
+        files: ${{ env.PACKAGED_OUTPUTPATH }}/*
