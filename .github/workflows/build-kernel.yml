@@ -67,7 +67,6 @@ jobs:
     - name: Compile Kernel
       id: compile
       run: |
-        mv config .config
         mkdir -p release/dtb
         sudo ./set_make
         sudo ./set_modules
