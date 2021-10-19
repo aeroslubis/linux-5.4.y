@@ -71,11 +71,11 @@ jobs:
         sudo ./set_make
         sudo ./set_modules
         sudo ./set_install
-        cp ./arch/arm64/boot/dts/amlogic/*.dtb release/dtb
+        cp ./arch/arm64/boot/dts/amlogic/*.dtb release/dtb/
         cd release
-        tar czf kernel.tar.gz kernel/*
-        tar czf modules.tar.gz modules/*
-        tar czf dtb.tar.gz dtb/*
+        tar czf kernel.tar.gz --directory=kernel/ .
+        tar czf modules.tar.gz --directory=modules/lib/modules/ .
+        tar czf dtb.tar.gz --directory=dtb/ .
         sudo rm -rf kernel modules dtb
         ls -lha
         echo "::set-output name=status::success"
